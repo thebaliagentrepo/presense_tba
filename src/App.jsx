@@ -5,8 +5,8 @@ function App() {
   return (
     <>
       <div className="font-poppins">
-        <Presense />
-        {/* <Login /> */}
+        {/* <Presense /> */}
+        <Login />
       </div>
     </>
   );
