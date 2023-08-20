@@ -1,10 +1,10 @@
-import logo from "../../public/logo.png";
-import img from "../../public/welcome.svg";
+import logo from "../assets/logo.png";
+import img from "../assets/Welcome.svg";
 
-const Presense = () => {
+const Presence = () => {
   return (
     <>
-      <div className="mt-[10%] sm:mt-20">
+      <div className="mt-[10%] sm:mt-20 font-poppins">
         <div className="flex justify-center">
           <img src={logo} alt="logo" className="w-36" />
         </div>
@@ -34,4 +34,4 @@ const Presense = () => {
   );
 };
 
-export default Presense;
+export default Presence;

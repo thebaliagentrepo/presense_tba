@@ -1,15 +1,13 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./components/Login";
-import Presense from "./components/Presense";
+import Presence from "./components/Presence";
 
-function App() {
-  return (
-    <>
-      <div className="font-poppins">
-        {/* <Presense /> */}
-        <Login />
-      </div>
-    </>
-  );
-}
+const router = createBrowserRouter([
+  { path: "/", element: <Login /> },
+  { path: "/presence", element: <Presence /> },
+]);
 
+const App = () => {
+  return <RouterProvider router={router} />;
+};
 export default App;
