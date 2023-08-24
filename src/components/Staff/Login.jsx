@@ -1,15 +1,19 @@
-import logo from "../assets/logo.png";
-import finger from "../assets/finger.svg";
+import logo from "../../assets/logo.png";
+import finger from "../../assets/finger.svg";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   if (isLoggedIn === true) {
-    // history.push("/presence");
+    navigate("/presence");
   }
 
   const isTokenValid = (token) => {
@@ -47,13 +51,17 @@ const Login = () => {
       });
 
       const token = response.data.accessToken;
-      console.log(token);
 
       localStorage.setItem("token", token);
-    } catch (error) {}
+      navigate("/presence");
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Email/Password Not Valid",
+      });
+    }
   };
-
-  console.log(isLoggedIn);
 
   return (
     <>
@@ -104,6 +112,14 @@ const Login = () => {
               >
                 Login
               </button>
+            </div>
+            <div className="text-center mt-1">
+              <Link
+                to="/admin"
+                className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+              >
+                login as admin
+              </Link>
             </div>
           </form>
         </div>
