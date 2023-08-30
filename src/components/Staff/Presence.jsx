@@ -1,5 +1,5 @@
 import logo from "../../assets/logo.png";
-import img from "../../assets/Welcome.svg";
+import img from "../../assets/welcome.svg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
