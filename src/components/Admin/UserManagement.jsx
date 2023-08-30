@@ -20,7 +20,7 @@ const UserManagement = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/allusers")
+      .get("https://nice-gold-kitten-tam.cyclic.app/api/allusers")
       .then((response) => {
         setData(response.data.data);
       })
@@ -48,7 +48,7 @@ const UserManagement = () => {
   const addUserHandler = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3000/api/user", {
+      await axios.post("https://nice-gold-kitten-tam.cyclic.app/api/user", {
         email,
         password,
         name,
@@ -86,10 +86,13 @@ const UserManagement = () => {
     e.preventDefault();
 
     try {
-      await axios.put(`http://localhost:3000/api/user/${id}`, {
-        email: emailEdit,
-        name: nameEdit,
-      });
+      await axios.put(
+        `https://nice-gold-kitten-tam.cyclic.app/api/user/${id}`,
+        {
+          email: emailEdit,
+          name: nameEdit,
+        }
+      );
 
       Swal.fire({
         position: "top-end",

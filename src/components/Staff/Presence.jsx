@@ -16,6 +16,9 @@ const Presence = () => {
   const [date, setDate] = useState("");
   const [desc, setDesc] = useState("");
 
+  const [buttonPresence, setButtonPresence] = useState(false);
+  const [idUser, setIdUser] = useState(0);
+
   const currentDate = new Date();
 
   const options = {
@@ -24,6 +27,9 @@ const Presence = () => {
     month: "short",
     day: "numeric",
   };
+
+  const month_api = currentDate.getMonth();
+  const day_api = currentDate.getDate();
 
   const date_fix = currentDate.toLocaleDateString("en-us", options);
 
@@ -63,6 +69,21 @@ const Presence = () => {
     }
   }, []);
 
+  const getPersonalPresence = async () => {
+    console.log("hello");
+    const data_today = await axios.post(
+      `https://nice-gold-kitten-tam.cyclic.app/api/v1/check-presence/${idUser}`,
+      {
+        month: month_api + 1,
+        day: day_api + 1,
+      }
+    );
+
+    if (data_today) {
+      setButtonPresence(true);
+    }
+  };
+
   let name_staff;
   let id_staff;
   let total_leave;
@@ -92,10 +113,14 @@ const Presence = () => {
 
   const presenceHandler = async () => {
     try {
-      await axios.post("http://localhost:3000/api/presence", {
-        userId: id_staff,
-        value: 1,
-      });
+      await axios.post(
+        `https://nice-gold-kitten-tam.cyclic.app/api/v1/test/${id_staff}`,
+        {
+          month: month_api + 1,
+          day: day_api,
+          value: "1",
+        }
+      );
 
       Swal.fire({
         position: "top-end",
@@ -112,7 +137,7 @@ const Presence = () => {
   const addLeaveHandler = async (e) => {
     e.preventDefault();
 
-    await axios.post("http://localhost:3000/api/infoleave", {
+    await axios.post("https://nice-gold-kitten-tam.cyclic.app/api/infoleave", {
       userId: id_staff,
       desc: desc,
       date: date,
@@ -138,7 +163,7 @@ const Presence = () => {
     setDesc(e.target.value);
   };
 
-  console.log(total_leave);
+  console.log(id_staff);
 
   return (
     <>
@@ -181,9 +206,9 @@ const Presence = () => {
           Logout
         </button>
       </div>
-      <div className="mt-2">
+      {/* <div className="mt-2">
         <p className="text-center">Remaining day off : {total_leave}</p>
-      </div>
+      </div> */}
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="fixed inset-0 bg-black opacity-50"></div>

@@ -6,24 +6,59 @@ import Swal from "sweetalert2";
 
 const Infoleave = () => {
   const [data, setData] = useState([]);
+  const [buttonPresence, setButtonPresence] = useState(false);
+  const [idUser, setIdUser] = useState(0);
 
   useEffect(() => {
     axios
       .get("http://localhost:3000/api/infoleave")
       .then((response) => {
         setData(response.data.data);
+        setIdUser(response.data.data.user.id);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
   }, []);
 
-  const approve_function = async (id, e) => {
+  useEffect(() => {
+    getPersonalPresence();
+    console.log("hello2");
+  }, [data, idUser]);
+
+  const getPersonalPresence = async () => {
+    console.log("hello");
+    const data_today = await axios.post(
+      `http://localhost:3000/api/v1/check-presence/${idUser}`,
+      {
+        month: month_api + 1,
+        day: day_api + 1,
+      }
+    );
+
+    if (data_today) {
+      setButtonPresence(true);
+    }
+  };
+
+  const approve_function = async (id, id_user, e) => {
     e.preventDefault;
 
+    const currentDate = new Date();
+
+    const month_api = currentDate.getMonth();
+    const day_api = currentDate.getDate();
+
+    console.log(id_user);
     try {
       await axios.put(`http://localhost:3000/api/infoleave/${id}`, {
         status: 1,
+      });
+
+      await axios.post(`http://localhost:3000/api/v1/test/${id_user}`, {
+        month: month_api + 1,
+        day: day_api + 1,
+        value: "H",
       });
 
       Swal.fire({
@@ -41,6 +76,8 @@ const Infoleave = () => {
       console.log(error);
     }
   };
+
+  console.log(buttonPresence);
 
   return (
     <>
@@ -89,7 +126,9 @@ const Infoleave = () => {
                   <td className="px-6 py-7">
                     <button
                       className="w-[150px] h-9 bg-[#279384] text-white rounded-lg "
-                      onClick={(e) => approve_function(item.id, e)}
+                      onClick={(e) =>
+                        approve_function(item.id, item.user.id, e)
+                      }
                     >
                       Approve
                     </button>

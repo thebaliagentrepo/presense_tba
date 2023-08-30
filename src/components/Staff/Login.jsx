@@ -45,10 +45,13 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3000/api/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "https://nice-gold-kitten-tam.cyclic.app/api/login",
+        {
+          email,
+          password,
+        }
+      );
 
       const token = response.data.accessToken;
 

@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 
 const TotalLeave = () => {
   const [data, setData] = useState([]);
+  const [data_fix, setData_fix] = useState([]);
   const [dataStaff, setDataStaff] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
@@ -21,13 +22,24 @@ const TotalLeave = () => {
     getDataStaff();
   }, []);
 
+  useEffect(() => {
+    const convertedArray = data.map((array) => ({
+      name: array[0],
+      value: array[1],
+    }));
+    setData_fix(convertedArray);
+  }, [data]);
+
   const editPresenceHandler = async (e) => {
     e.preventDefault;
 
     try {
-      await axios.put(`http://localhost:3000/api/totalleave/${id}`, {
-        value: editTotalPresence,
-      });
+      await axios.put(
+        `https://nice-gold-kitten-tam.cyclic.app/api/totalleave/${id}`,
+        {
+          value: editTotalPresence,
+        }
+      );
 
       Swal.fire({
         position: "top-end",
@@ -47,18 +59,20 @@ const TotalLeave = () => {
 
   const getTotalLeave = () => {
     axios
-      .get("http://localhost:3000/api/totalleave")
+      .get("https://nice-gold-kitten-tam.cyclic.app/api/v1/total-leave")
       .then((response) => {
-        setData(response.data.data);
+        setData(response.data.values);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
   };
 
+  console.log(data);
+
   const getDataStaff = () => {
     axios
-      .get("http://localhost:3000/api/allusers")
+      .get("https://nice-gold-kitten-tam.cyclic.app/api/allusers")
       .then((response) => {
         setDataStaff(response.data.data);
       })
@@ -101,12 +115,17 @@ const TotalLeave = () => {
     }
   };
 
-  const changeModals = (number) => {
+  const changeModals = (names) => {
     setShowModalEdit(true);
-    const filter = data.filter((dt) => dt.id == number);
-    setEditTotalPresence(filter[0].total_leave.value);
-    setId(filter[0].total_leave.id);
+    const filter = data_fix.filter((dt) => dt.name == names);
+    setEditTotalPresence(filter[0].value);
   };
+  // const arrayOfObjects = data.map((array) => {
+  //   return {
+  //     name: array[0],
+  //     value: array[1],
+  //   };
+  // });
 
   return (
     <>
@@ -133,9 +152,6 @@ const TotalLeave = () => {
                   Name
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Email
-                </th>
-                <th scope="col" className="px-6 py-3">
                   Total Leave
                 </th>
                 <th scope="col" className="px-6 py-3">
@@ -144,10 +160,10 @@ const TotalLeave = () => {
               </tr>
             </thead>
             <tbody>
-              {data.map((item, index) => (
+              {data_fix.map((item, index) => (
                 <tr
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                  key={item.id}
+                  key={index + 1}
                 >
                   <th
                     scope="row"
@@ -156,10 +172,10 @@ const TotalLeave = () => {
                     {index + 1}
                   </th>
                   <td className="px-6 py-4"> {item.name}</td>
-                  <td className="px-6 py-4">{item.email}</td>
-                  <td className="px-6 py-4">{item.total_leave.value}</td>
+
+                  <td className="px-6 py-4">{item.value}</td>
                   <td className="px-6 py-7">
-                    <button onClick={() => changeModals(item.id)}>
+                    <button onClick={() => changeModals(item.name)}>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import Logo from "../../assets/logo_tp.png";
 
 const AdminLayout = (props) => {
   const navigate = useNavigate();
@@ -25,11 +26,7 @@ const AdminLayout = (props) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-start">
               <a href="https://flowbite.com" className="flex ml-2 md:mr-24">
-                <img
-                  src="https://flowbite.com/docs/images/logo.svg"
-                  className="h-8 mr-3"
-                  alt="FlowBite Logo"
-                />
+                <img src={Logo} className="h-8 mr-3" alt="FlowBite Logo" />
                 <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
                   The Bali Agent
                 </span>
@@ -199,7 +196,7 @@ const AdminLayout = (props) => {
                 </span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link
                 to="/admin/presence"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
@@ -217,7 +214,7 @@ const AdminLayout = (props) => {
                 </svg>
                 <span className="flex-1 ml-3 whitespace-nowrap">Presence</span>
               </Link>
-            </li>
+            </li> */}
           </ul>
         </div>
       </aside>
