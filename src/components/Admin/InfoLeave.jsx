@@ -3,63 +3,50 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import moment from "moment";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const Infoleave = () => {
   const [data, setData] = useState([]);
-  const [buttonPresence, setButtonPresence] = useState(false);
-  const [idUser, setIdUser] = useState(0);
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem("token_admin");
+    if (token == null) {
+      navigate("/admin");
+    }
+  }, []);
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/infoleave")
+      .get(`${import.meta.env.VITE_LINK_API}/api/infoleave`)
       .then((response) => {
         setData(response.data.data);
-        setIdUser(response.data.data.user.id);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
   }, []);
 
-  useEffect(() => {
-    getPersonalPresence();
-    console.log("hello2");
-  }, [data, idUser]);
-
-  const getPersonalPresence = async () => {
-    console.log("hello");
-    const data_today = await axios.post(
-      `http://localhost:3000/api/v1/check-presence/${idUser}`,
-      {
-        month: month_api + 1,
-        day: day_api + 1,
-      }
-    );
-
-    if (data_today) {
-      setButtonPresence(true);
-    }
-  };
-
-  const approve_function = async (id, id_user, e) => {
+  const approve_function = async (id, id_user, date, value, e) => {
     e.preventDefault;
 
-    const currentDate = new Date();
+    // const month_api = date.getMonth();
+    const month_api = moment(date).format("M");
+    const day_api = moment(date).format("D");
 
-    const month_api = currentDate.getMonth();
-    const day_api = currentDate.getDate();
-
-    console.log(id_user);
     try {
-      await axios.put(`http://localhost:3000/api/infoleave/${id}`, {
+      await axios.put(`${import.meta.env.VITE_LINK_API}/api/infoleave/${id}`, {
         status: 1,
       });
 
-      await axios.post(`http://localhost:3000/api/v1/test/${id_user}`, {
-        month: month_api + 1,
-        day: day_api + 1,
-        value: "H",
-      });
+      await axios.post(
+        `${import.meta.env.VITE_LINK_API}/api/v1/test/${id_user}`,
+        {
+          month: month_api,
+          day: day_api,
+          value: value,
+        }
+      );
 
       Swal.fire({
         position: "top-end",
@@ -76,8 +63,6 @@ const Infoleave = () => {
       console.log(error);
     }
   };
-
-  console.log(buttonPresence);
 
   return (
     <>
@@ -97,6 +82,9 @@ const Infoleave = () => {
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Leave Date
+                </th>
+                <th scope="col" className="px-6 py-3">
+                  Option Leave
                 </th>
                 <th scope="col" className="px-6 py-3">
                   Description for leaving
@@ -122,12 +110,19 @@ const Infoleave = () => {
                   <td className="px-6 py-4">
                     {moment(item.date).format("DD-MM-YYYY")}
                   </td>
+                  <td className="px-6 py-4">{item.value}</td>
                   <td className="px-6 py-4">{item.desc}</td>
                   <td className="px-6 py-7">
                     <button
                       className="w-[150px] h-9 bg-[#279384] text-white rounded-lg "
                       onClick={(e) =>
-                        approve_function(item.id, item.user.id, e)
+                        approve_function(
+                          item.id,
+                          item.user.order,
+                          item.date,
+                          item.value,
+                          e
+                        )
                       }
                     >
                       Approve

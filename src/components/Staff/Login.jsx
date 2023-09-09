@@ -46,7 +46,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "https://nice-gold-kitten-tam.cyclic.app/api/login",
+        `${import.meta.env.VITE_LINK_API}/api/login`,
         {
           email,
           password,

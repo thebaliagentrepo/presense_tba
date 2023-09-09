@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Select from "react-select";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const TotalLeave = () => {
   const [data, setData] = useState([]);
@@ -15,7 +16,14 @@ const TotalLeave = () => {
   const [showModalEdit, setShowModalEdit] = useState(false);
 
   const [editTotalPresence, setEditTotalPresence] = useState("");
-  const [id, setId] = useState("");
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem("token_admin");
+    if (token == null) {
+      navigate("/admin");
+    }
+  }, []);
 
   useEffect(() => {
     getTotalLeave();
@@ -34,12 +42,9 @@ const TotalLeave = () => {
     e.preventDefault;
 
     try {
-      await axios.put(
-        `https://nice-gold-kitten-tam.cyclic.app/api/totalleave/${id}`,
-        {
-          value: editTotalPresence,
-        }
-      );
+      await axios.put(`${import.meta.env.VITE_LINK_API}/api/totalleave/${id}`, {
+        value: editTotalPresence,
+      });
 
       Swal.fire({
         position: "top-end",
@@ -59,7 +64,7 @@ const TotalLeave = () => {
 
   const getTotalLeave = () => {
     axios
-      .get("https://nice-gold-kitten-tam.cyclic.app/api/v1/total-leave")
+      .get(`${import.meta.env.VITE_LINK_API}/api/v1/total-leave`)
       .then((response) => {
         setData(response.data.values);
       })
@@ -72,7 +77,7 @@ const TotalLeave = () => {
 
   const getDataStaff = () => {
     axios
-      .get("https://nice-gold-kitten-tam.cyclic.app/api/allusers")
+      .get(`${import.meta.env.VITE_LINK_API}/api/allusers`)
       .then((response) => {
         setDataStaff(response.data.data);
       })
@@ -94,7 +99,7 @@ const TotalLeave = () => {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:3000/api/totalleave", {
+      await axios.post(`${import.meta.env.VITE_LINK_API}/api/totalleave`, {
         userId: idStaff,
         value: totalleave,
       });

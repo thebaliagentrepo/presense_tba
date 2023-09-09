@@ -2,12 +2,15 @@ import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Logo from "../../assets/logo_tp.png";
 
+
 const AdminLayout = (props) => {
+
   const navigate = useNavigate();
+
   const logoutHandler = (e) => {
     e.preventDefault();
 
-    localStorage.removeItem("token");
+    localStorage.removeItem("token_admin");
 
     Swal.fire({
       position: "top-end",
@@ -19,6 +22,7 @@ const AdminLayout = (props) => {
 
     navigate("/admin");
   };
+
   return (
     <>
       <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">

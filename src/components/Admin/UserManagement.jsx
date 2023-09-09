@@ -2,7 +2,7 @@ import AdminLayout from "./AdminLayout";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-
+import { useNavigate } from "react-router-dom";
 const UserManagement = () => {
   const [data, setData] = useState([]);
 
@@ -14,13 +14,23 @@ const UserManagement = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [order, setOrder] = useState("");
 
   const [emailEdit, setEmailEdit] = useState("");
   const [nameEdit, setNameEdit] = useState("");
+  const [orderEdit, setOrderEdit] = useState("");
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem("token_admin");
+    if (token == null) {
+      navigate("/admin");
+    }
+  }, []);
 
   useEffect(() => {
     axios
-      .get("https://nice-gold-kitten-tam.cyclic.app/api/allusers")
+      .get(`${import.meta.env.VITE_LINK_API}/api/allusers`)
       .then((response) => {
         setData(response.data.data);
       })
@@ -45,13 +55,18 @@ const UserManagement = () => {
     setName(e.target.value);
   };
 
+  const handleOrderChange = (e) => {
+    setOrder(e.target.value);
+  };
+
   const addUserHandler = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("https://nice-gold-kitten-tam.cyclic.app/api/user", {
+      await axios.post(`${import.meta.env.VITE_LINK_API}/api/user`, {
         email,
         password,
         name,
+        order,
       });
 
       Swal.fire({
@@ -79,6 +94,7 @@ const UserManagement = () => {
     const filter = data.filter((dt) => dt.id == number);
     setEmailEdit(filter[0].email);
     setNameEdit(filter[0].name);
+    setOrderEdit(filter[0].order);
     setId(filter[0].id);
   };
 
@@ -86,13 +102,11 @@ const UserManagement = () => {
     e.preventDefault();
 
     try {
-      await axios.put(
-        `https://nice-gold-kitten-tam.cyclic.app/api/user/${id}`,
-        {
-          email: emailEdit,
-          name: nameEdit,
-        }
-      );
+      await axios.put(`${import.meta.env.VITE_LINK_API}/api/user/${id}`, {
+        email: emailEdit,
+        name: nameEdit,
+        order: orderEdit,
+      });
 
       Swal.fire({
         position: "top-end",
@@ -140,6 +154,9 @@ const UserManagement = () => {
                   Email
                 </th>
                 <th scope="col" className="px-6 py-3">
+                  Order
+                </th>
+                <th scope="col" className="px-6 py-3">
                   Action
                 </th>
               </tr>
@@ -158,6 +175,7 @@ const UserManagement = () => {
                   </th>
                   <td className="px-6 py-7">{item.name}</td>
                   <td className="px-6 py-4">{item.email}</td>
+                  <td className="px-6 py-4">{item.order}</td>
                   <td className="px-6 py-7">
                     <button onClick={() => changeModals(item.id)}>
                       <svg
@@ -224,6 +242,19 @@ const UserManagement = () => {
                             id="email"
                             placeholder="Email"
                             onChange={handleEmailChange}
+                            required
+                          />
+                        </label>
+                      </div>
+
+                      <div className="flex justify-center mt-2">
+                        <label className="block">
+                          <input
+                            type="text"
+                            className="shadow appearance-none border rounded w-[350px] py-2 px-3 text-gray-700 leading-tight"
+                            id="email"
+                            placeholder="Order"
+                            onChange={handleOrderChange}
                             required
                           />
                         </label>
@@ -311,6 +342,20 @@ const UserManagement = () => {
                             placeholder="Email"
                             value={emailEdit}
                             onChange={(e) => setEmailEdit(e.target.value)}
+                            required
+                          />
+                        </label>
+                      </div>
+
+                      <div className="flex justify-center mt-2">
+                        <label className="block">
+                          <input
+                            type="text"
+                            className="shadow appearance-none border rounded w-[350px] py-2 px-3 text-gray-700 leading-tight"
+                            id="orderEdit"
+                            placeholder="Order"
+                            value={orderEdit}
+                            onChange={(e) => setOrderEdit(e.target.value)}
                             required
                           />
                         </label>

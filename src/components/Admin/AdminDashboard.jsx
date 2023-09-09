@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import FAQDropdown from "./FaqDropdown";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const faqData = [
@@ -129,6 +131,13 @@ const AdminDashboard = () => {
     },
     // Add more question-answer pairs as needed
   ];
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem("token_admin");
+    if (token == null) {
+      navigate("/admin");
+    }
+  }, []);
 
   return (
     <>

@@ -19,6 +19,7 @@ const LoginAdmin = () => {
   const isTokenValid = (token) => {
     try {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      console.log(decodedToken);
       const expirationTime = decodedToken.exp * 1000; // Convert expiration time to milliseconds
       return expirationTime > Date.now();
     } catch (error) {
@@ -28,7 +29,7 @@ const LoginAdmin = () => {
 
   useEffect(() => {
     // Check token validity when the component mounts
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token_admin");
     if (token && isTokenValid(token)) {
       setIsLoggedIn(true);
     }
@@ -45,15 +46,26 @@ const LoginAdmin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3000/api/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_LINK_API}/api/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       const token = response.data.accessToken;
-
-      localStorage.setItem("token", token);
-      navigate("/admin/dashboard");
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      if (decodedToken.isAdmin) {
+        localStorage.setItem("token_admin", token);
+        navigate("/admin/dashboard");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Not Admin",
+        });
+      }
     } catch (error) {
       Swal.fire({
         icon: "error",

@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
 import Swal from "sweetalert2";
+import Select from "react-select";
+import moment from "moment";
 
 const Presence = () => {
   const navigate = useNavigate();
@@ -12,12 +14,21 @@ const Presence = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [decoded, setDecoded] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalInfo, setModalInfo] = useState(false);
 
   const [date, setDate] = useState("");
   const [desc, setDesc] = useState("");
 
   const [buttonPresence, setButtonPresence] = useState(false);
-  const [idUser, setIdUser] = useState(0);
+
+  const [optionLeave, setOptionLeave] = useState("");
+
+  const [dataLeave, setDataLeave] = useState([]);
+
+  const optionsLeave = [
+    { value: "H", label: "Holiday" },
+    { value: "S", label: "Sick" },
+  ];
 
   const currentDate = new Date();
 
@@ -69,29 +80,16 @@ const Presence = () => {
     }
   }, []);
 
-  const getPersonalPresence = async () => {
-    console.log("hello");
-    const data_today = await axios.post(
-      `https://nice-gold-kitten-tam.cyclic.app/api/v1/check-presence/${idUser}`,
-      {
-        month: month_api + 1,
-        day: day_api + 1,
-      }
-    );
-
-    if (data_today) {
-      setButtonPresence(true);
-    }
-  };
-
   let name_staff;
   let id_staff;
   let total_leave;
+  let id_staff_db;
   if (decoded === null) {
     name_staff = "staff";
   } else {
     name_staff = decoded.name;
-    id_staff = decoded.id;
+    id_staff = decoded.order;
+    id_staff_db = decoded.id;
     total_leave = decoded.value;
   }
 
@@ -114,13 +112,20 @@ const Presence = () => {
   const presenceHandler = async () => {
     try {
       await axios.post(
-        `https://nice-gold-kitten-tam.cyclic.app/api/v1/test/${id_staff}`,
+        `${import.meta.env.VITE_LINK_API}/api/v1/test/${id_staff}`,
         {
           month: month_api + 1,
           day: day_api,
           value: "1",
         }
       );
+
+      await axios.post(`${import.meta.env.VITE_LINK_API}/api/presence`, {
+        userId: id_staff_db,
+        value: 1,
+      });
+
+      setButtonPresence(true);
 
       Swal.fire({
         position: "top-end",
@@ -137,11 +142,12 @@ const Presence = () => {
   const addLeaveHandler = async (e) => {
     e.preventDefault();
 
-    await axios.post("https://nice-gold-kitten-tam.cyclic.app/api/infoleave", {
-      userId: id_staff,
+    await axios.post(`${import.meta.env.VITE_LINK_API}/api/infoleave`, {
+      userId: id_staff_db,
       desc: desc,
       date: date,
       status: 0,
+      value: optionLeave,
     });
 
     Swal.fire({
@@ -163,7 +169,30 @@ const Presence = () => {
     setDesc(e.target.value);
   };
 
-  console.log(id_staff);
+  const getPersonalPresence = async () => {
+    const data_today = await axios.get(
+      `${
+        import.meta.env.VITE_LINK_API
+      }/api/v1/check-presence/${id_staff}?months=${
+        month_api + 1
+      }&day=${day_api}`
+    );
+
+    setButtonPresence(data_today.data);
+  };
+
+  getPersonalPresence();
+
+  useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_LINK_API}/api/info-leave/${id_staff_db}`)
+      .then((response) => {
+        setDataLeave(response.data.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }, [modalInfo]);
 
   return (
     <>
@@ -182,13 +211,24 @@ const Presence = () => {
       <div className="mt-2">
         <p className="text-center">{date_fix}</p>
       </div>
+
       <div className="flex justify-center mt-4">
-        <button
-          className="w-[150px] h-9 bg-[#279384] text-white rounded-lg "
-          onClick={presenceHandler}
-        >
-          Present
-        </button>
+        {buttonPresence ? (
+          <button
+            className="w-[150px] h-9 bg-[#279384] text-white rounded-lg disabled:opacity-50"
+            disabled
+            onClick={presenceHandler}
+          >
+            Present
+          </button>
+        ) : (
+          <button
+            className="w-[150px] h-9 bg-[#279384] text-white rounded-lg "
+            onClick={presenceHandler}
+          >
+            Present
+          </button>
+        )}
       </div>
       <div className="flex justify-center mt-3">
         <button
@@ -209,6 +249,17 @@ const Presence = () => {
       {/* <div className="mt-2">
         <p className="text-center">Remaining day off : {total_leave}</p>
       </div> */}
+      <div className="static">
+        <div className="absolute top-0 right-0 p-2">
+          <button
+            className="px-3 py-2h-9 bg-sky-600 text-white rounded-lg w-[35px] h-[35px] font-bold"
+            onClick={(e) => setModalInfo(true)}
+          >
+            i
+          </button>
+        </div>
+      </div>
+
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="fixed inset-0 bg-black opacity-50"></div>
@@ -216,15 +267,23 @@ const Presence = () => {
             <h3 className="text-center font-semibold text-lg">Detail</h3>
             <div>
               <form onSubmit={addLeaveHandler}>
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label className="block text-gray-700 text-sm font-bold mb-1">
                   Pick Date
                 </label>
                 <input
                   type="date"
-                  className="shadow appearance-none border rounded w-[250px] py-2 px-3 text-gray-700 leading-tight"
+                  className="shadow appearance-none border rounded w-[350px] py-2 px-3 text-gray-700 leading-tight"
                   onChange={dateHandler}
                 />
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label className="block text-gray-700 text-sm font-bold mb-1 mt-3">
+                  Select Options
+                </label>
+                <Select
+                  options={optionsLeave}
+                  className="w-[350px]"
+                  onChange={(e) => setOptionLeave(e.value)}
+                />
+                <label className="block text-gray-700 text-sm font-bold mb-1 mt-3">
                   Reason For Leave
                 </label>
                 <textarea
@@ -255,7 +314,70 @@ const Presence = () => {
           </div>
         </div>
       )}
-      );
+
+      {modalInfo && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black opacity-50"></div>
+          <div className="bg-white p-4 rounded shadow-md z-10">
+            <h3 className="text-center font-semibold text-lg">Info</h3>
+            <div>
+              <div>
+                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 table-auto">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                      <th scope="col" className="px-6 py-3">
+                        No
+                      </th>
+                      <th scope="col" className="px-6 py-3">
+                        date
+                      </th>
+                      <th scope="col" className="px-6 py-3">
+                        Category
+                      </th>
+                      <th scope="col" className="px-6 py-3">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dataLeave.map((item, index) => (
+                      <tr
+                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                        key={item.id}
+                      >
+                        <th
+                          scope="row"
+                          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                        >
+                          {index + 1}
+                        </th>
+                        <td className="px-6 py-4">
+                          {moment(item.date).format("DD-MM-YYYY")}
+                        </td>
+                        <td className="px-6 py-4">{item.value}</td>
+
+                        {item.status ? (
+                          <td className="px-6 py-4">Approve</td>
+                        ) : (
+                          <td className="px-6 py-4">Waiting</td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-2">
+                <button
+                  className="w-[70px] h-9 bg-[#FF0000] text-white rounded"
+                  onClick={(e) => setModalInfo(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
