@@ -7,6 +7,7 @@ import jwt_decode from "jwt-decode";
 import Swal from "sweetalert2";
 import Select from "react-select";
 import moment from "moment";
+import Loading from "../UI/Loading";
 
 const Presence = () => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const Presence = () => {
   const [optionLeave, setOptionLeave] = useState("");
 
   const [dataLeave, setDataLeave] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const optionsLeave = [
     { value: "H", label: "Holiday" },
@@ -110,6 +113,7 @@ const Presence = () => {
   };
 
   const presenceHandler = async () => {
+    setIsLoading(true);
     try {
       await axios.post(
         `${import.meta.env.VITE_LINK_API}/api/v1/test/${id_staff}`,
@@ -126,7 +130,7 @@ const Presence = () => {
       });
 
       setButtonPresence(true);
-
+      setIsLoading(false);
       Swal.fire({
         position: "top-end",
         icon: "success",
@@ -135,20 +139,22 @@ const Presence = () => {
         timer: 1500,
       });
     } catch (error) {
+      setIsLoading(false);
       console.log(error);
     }
   };
 
   const addLeaveHandler = async (e) => {
     e.preventDefault();
-
+    setIsLoading(true);
     await axios.post(`${import.meta.env.VITE_LINK_API}/api/infoleave`, {
       userId: id_staff_db,
       desc: desc,
       date: date,
-      status: 0,
+      status: false,
       value: optionLeave,
     });
+    setIsLoading(false);
 
     Swal.fire({
       position: "top-end",
@@ -378,6 +384,7 @@ const Presence = () => {
           </div>
         </div>
       )}
+      <Loading loading={isLoading} />
     </>
   );
 };

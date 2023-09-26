@@ -4,9 +4,11 @@ import axios from "axios";
 import moment from "moment";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import LoadingAdmin from "../UI/LoadingAdmin";
 
 const Infoleave = () => {
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -29,6 +31,7 @@ const Infoleave = () => {
 
   const approve_function = async (id, id_user, date, value, e) => {
     e.preventDefault;
+    setIsLoading(true);
 
     // const month_api = date.getMonth();
     const month_api = moment(date).format("M");
@@ -36,7 +39,7 @@ const Infoleave = () => {
 
     try {
       await axios.put(`${import.meta.env.VITE_LINK_API}/api/infoleave/${id}`, {
-        status: 1,
+        status: true,
       });
 
       await axios.post(
@@ -47,6 +50,8 @@ const Infoleave = () => {
           value: value,
         }
       );
+
+      setIsLoading(false);
 
       Swal.fire({
         position: "top-end",
@@ -60,6 +65,7 @@ const Infoleave = () => {
         window.location.reload();
       }, 1501);
     } catch (error) {
+      setIsLoading(false);
       console.log(error);
     }
   };
@@ -70,6 +76,7 @@ const Infoleave = () => {
         <h3 className="text-center font-semibold text-2xl">
           Management Info Leave
         </h3>
+        <LoadingAdmin loading={isLoading} />
         <div className="mt-5">
           <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 table-auto">
             <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">

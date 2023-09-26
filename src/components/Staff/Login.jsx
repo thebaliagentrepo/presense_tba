@@ -5,12 +5,15 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
+import Loading from "../UI/Loading";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   if (isLoggedIn === true) {
     navigate("/presence");
@@ -44,6 +47,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setIsLoading(true);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_LINK_API}/api/login`,
@@ -56,8 +61,10 @@ const Login = () => {
       const token = response.data.accessToken;
 
       localStorage.setItem("token", token);
+      setIsLoading(false);
       navigate("/presence");
     } catch (error) {
+      setIsLoading(false);
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -127,6 +134,7 @@ const Login = () => {
           </form>
         </div>
       </div>
+      <Loading loading={isLoading} />
     </>
   );
 };

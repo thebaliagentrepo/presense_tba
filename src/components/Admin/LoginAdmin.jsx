@@ -5,12 +5,17 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
+import Loading from "../UI/Loading";
 
 const LoginAdmin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+
+  
+
+  const [isLoading, setIsLoading] = useState(false);
 
   if (isLoggedIn === true) {
     navigate("/admin/dashboard");
@@ -45,6 +50,7 @@ const LoginAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_LINK_API}/api/login`,
@@ -56,6 +62,7 @@ const LoginAdmin = () => {
 
       const token = response.data.accessToken;
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      setIsLoading(false);
       if (decodedToken.isAdmin) {
         localStorage.setItem("token_admin", token);
         navigate("/admin/dashboard");
@@ -67,6 +74,7 @@ const LoginAdmin = () => {
         });
       }
     } catch (error) {
+      setIsLoading(false);
       Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -134,6 +142,7 @@ const LoginAdmin = () => {
           </form>
         </div>
       </div>
+      <Loading loading={isLoading} />
     </>
   );
 };
